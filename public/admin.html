@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Salon — Owner Administration &amp; Daily Schedule</title>
+  <meta name="description" content="Salon manager dashboard to review today's schedule, manage client appointments, update statuses, and generate bills.">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/jpeg" href="/images/salon_logo.jpg">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="/" class="brand-wrapper">
+      <img src="/images/salon_logo.jpg" alt="Aura Luxury Salon" class="brand-logo-img">
+      <div class="brand-info">
+        <h1>Aura Salon</h1>
+        <span>Admin &amp; Schedule Portal</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" class="nav-item">Customer Portal</a></li>
+      <li><a href="/admin.html" class="nav-item active">Admin Dashboard</a></li>
+      <li><a href="/billing.html" class="nav-item highlight">Billing POS</a></li>
+    </ul>
+  </nav>
+
+  <!-- Admin Main Container -->
+  <main class="container">
+
+    <!-- Header & Top Summary -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="section-tag">Operations Center</span>
+        <h2 style="font-size: 2.2rem; color: #fff;">Appointments &amp; Day View</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Manage salon chair occupancy, update customer statuses, and avoid double-booking.
+        </p>
+      </div>
+
+      <!-- View Switcher Tabs -->
+      <div style="display: flex; gap: 0.5rem; background: var(--bg-card); padding: 0.35rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+        <button type="button" class="btn btn-gold btn-sm" id="tab-btn-list">
+          📋 List View
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" id="tab-btn-calendar">
+          🗓️ Day Timeline View
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Metric Cards -->
+    <div class="admin-metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Today's Bookings</div>
+        <div class="metric-value" id="metric-today-count">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Confirmed Clients</div>
+        <div class="metric-value" id="metric-confirmed-count" style="color: #38bdf8;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Pending Approvals</div>
+        <div class="metric-value" id="metric-pending-count" style="color: #fbbf24;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Completed (Done)</div>
+        <div class="metric-value" id="metric-done-count" style="color: #34d399;">0</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="filter-bar">
+      <div class="filter-controls">
+        <!-- Date Selector -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <label for="admin-filter-date" style="font-size: 0.82rem; color: var(--text-secondary);">Date:</label>
+          <input type="date" id="admin-filter-date" class="form-control" style="width: auto; padding: 0.45rem 0.8rem; font-size: 0.88rem;">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-quick-today">Today</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-clear-date">All Dates</button>
+        </div>
+
+        <!-- Status Filter -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <label for="admin-filter-status" style="font-size: 0.82rem; color: var(--text-secondary);">Status:</label>
+          <select id="admin-filter-status" class="form-control" style="width: auto; padding: 0.45rem 2.2rem 0.45rem 0.8rem; font-size: 0.88rem;">
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Done">Done</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Search Input -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 260px;">
+        <input type="text" id="admin-search-input" class="form-control" placeholder="Search name, phone, service..." style="padding: 0.45rem 0.8rem; font-size: 0.88rem;">
+      </div>
+    </div>
+
+    <!-- VIEW 1: TABLE / LIST VIEW -->
+    <div id="view-list" class="glass-panel" style="padding: 1.5rem;">
+      <div class="table-responsive">
+        <table class="custom-table" id="bookings-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer Name</th>
+              <th>Phone</th>
+              <th>Service</th>
+              <th>Date &amp; Time</th>
+              <th>Status</th>
+              <th>Change Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-table-body">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading bookings...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 2: CALENDAR / DAY TIMELINE VIEW -->
+    <div id="view-calendar" class="glass-panel" style="display: none; padding: 1.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="color: #fff; font-size: 1.25rem;">
+          📅 Day Schedule: <span id="calendar-day-label" style="color: var(--gold-light);">Today</span>
+        </h3>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">
+          Operating Hours: 09:00 AM – 08:00 PM (30 min slots)
+        </span>
+      </div>
+
+      <div class="timeline-view" id="timeline-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-brand">Aura Luxury Salon Admin</div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Changes save directly into SQLite persistent storage &bull; Refreshing or restarting server retains all records.
+    </p>
+  </footer>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
